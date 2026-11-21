@@ -27,7 +27,7 @@ window.GameAudio=(()=>{
     catch{/* O jogo continua normalmente se o navegador não disponibilizar áudio. */}
   }
   function apply(){if(!context)return;master.gain.setTargetAtTime(enabled?.65:0,context.currentTime,.08);musicBus.gain.setTargetAtTime(settings.music,context.currentTime,.08);fxBus.gain.setTargetAtTime(settings.effects,context.currentTime,.03);}
-  function configure(muted,values={}){enabled=!muted;settings={music:Number.isFinite(values.music)?Math.max(0,Math.min(1,values.music)):.28,effects:Number.isFinite(values.effects)?Math.max(0,Math.min(1,values.effects)):.55};apply();if(enabled&&context?.state==='suspended'&&!document.hidden)void unlock();}
+  function configure(muted,values={}){enabled=!muted;if(muted)silenceSpeech();settings={music:Number.isFinite(values.music)?Math.max(0,Math.min(1,values.music)):.28,effects:Number.isFinite(values.effects)?Math.max(0,Math.min(1,values.effects)):.55};apply();if(enabled&&context?.state==='suspended'&&!document.hidden)void unlock();}
   function play(type='tap'){
     if(!context||!enabled||settings.effects===0)return;const t=context.currentTime;if(type==='tap'){if(t-lastTap<.045)return;lastTap=t;}
     if(type==='success'){[523,659,784].forEach((f,i)=>tone(f,t+i*.07,.18,.14,'sine'));}
@@ -38,14 +38,22 @@ window.GameAudio=(()=>{
   function voice(actor,textIndex){
     if(!context||!enabled||settings.effects===0||context.currentTime-lastVoice<.06)return;
     lastVoice=context.currentTime;const [pitch,type]=profiles[actor]||[170,'triangle'];
-    const f=pitch*(1+((textIndex%5)-2)*.045);tone(f,lastVoice,.055,.09,type);tone(f*2,lastVoice,.035,.018,'sine');
+    const f=pitch*(1+((textIndex%5)-2)*.045);tone(f,lastVoice,.065,.24,type);tone(f*2,lastVoice,.045,.045,'sine');
   }
+  function hoho(){
+    if(!context||!enabled||settings.effects===0)return;
+    const synth=window.speechSynthesis,Voice=window.SpeechSynthesisUtterance;
+    const voice=synth?.getVoices().find(v=>v.localService&&/^pt/i.test(v.lang));
+    if(voice&&Voice){const utterance=new Voice('Ho! Ho! Ho!');utterance.voice=voice;utterance.lang=voice.lang;utterance.pitch=.55;utterance.rate=.7;utterance.volume=settings.effects;synth.speak(utterance);return;}
+    const t=context.currentTime;for(let i=0;i<3;i++){tone(92-i*5,t+i*.45,.33,.34,'triangle');tone(470,t+i*.45,.24,.07,'sine');tone(780,t+i*.45,.2,.025,'sine');}
+  }
+  function silenceSpeech(){window.speechSynthesis?.cancel();}
   function setMode(value){if(mode===value)return;mode=value;step=0;if(context)next=context.currentTime+.05;}
   document.addEventListener('pointerdown',()=>void unlock(),{passive:true});
   document.addEventListener('keydown',()=>void unlock());
   document.addEventListener('click',e=>{if(e.target.closest('button')&&!e.target.closest('#next-line'))play('tap');});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)context?.suspend();else if(enabled)void unlock();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){context?.suspend();silenceSpeech();}else if(enabled)void unlock();});
   window.addEventListener('pagehide',()=>{clearInterval(timer);context?.suspend();});
   window.addEventListener('pageshow',e=>{if(e.persisted){clearInterval(timer);timer=setInterval(schedule,100);if(enabled)void unlock();}});
-  return {configure,unlock,play,voice,setMode};
+  return {configure,unlock,play,voice,setMode,hoho,silenceSpeech};
 })();

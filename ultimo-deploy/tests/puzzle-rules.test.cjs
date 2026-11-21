@@ -31,3 +31,6 @@ test('Testes exigem todos os campos e não permitem alterar relatório',()=>{
   assert.equal(R.execute(valid+'\nconferir("total", 0)','tests').success,false);
   assert.equal(R.execute('total = 0\n'+valid,'tests').ok,false);
 });
+
+test('Painel de luzes é reversível e tem solução',()=>{let lights=[...R.lockStart];assert.ok(lights.some(Boolean));for(const i of [0,4,8])lights=R.toggleLock(lights,i);assert.ok(lights.every(v=>!v));const initial=[...R.lockStart];assert.equal(JSON.stringify(R.toggleLock(R.toggleLock(initial,3),3)),JSON.stringify(initial));});
+test('Memória sempre possui quatro pares sem cartões sobrando',()=>{for(let n=0;n<10;n++){const deck=R.memoryDeck();assert.equal(deck.length,8);const keys=[...new Set(deck.map(c=>c.key))];assert.equal(keys.length,4);for(const key of keys)assert.equal(deck.filter(c=>c.key===key).length,2);}});

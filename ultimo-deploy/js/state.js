@@ -1,7 +1,7 @@
 /* Máquina de estados e regras puras: usadas pelo jogo e pelos testes. */
 window.Campaign = (() => {
   const SAVE_KEY='ultimo-deploy-v1';
-  const fresh=()=>({version:1,started:false,act:1,clues:[],talked:[],helpers:[],solved:{commits:false,network:false,database:false},deduced:false,revealed:false,setup:0,tests:false,extras:false,extraTests:false,ending:null,failures:0,hints:0,seconds:0,scene:'factory',position:{x:309,y:296},visited:['factory'],achievements:[],muted:false,audio:{music:.28,effects:.55}});
+  const fresh=()=>({version:1,started:false,act:1,clues:[],talked:[],helpers:[],solved:{commits:false,network:false,database:false},deduced:false,revealed:false,setup:0,tests:false,extras:false,extraTests:false,ending:null,finaleSeen:false,failures:0,hints:0,seconds:0,scene:'factory',position:{x:309,y:296},visited:['factory'],achievements:[],muted:false,audio:{music:.28,effects:.55}});
   function sync(s){
     // Compatibilidade com partidas anteriores à entrada do Willian no elenco.
     if(s.solved.commits){if(!s.clues.includes('innocence'))s.clues.push('innocence');if(!s.achievements.includes('Justiça pelo estagiário'))s.achievements.push('Justiça pelo estagiário');}
@@ -25,8 +25,8 @@ window.Campaign = (() => {
   }
   function validate(s,total,dupes,destination){s.tests=s.setup===4&&total==='2400000'&&dupes==='0'&&destination==='production';return s.tests;}
   function deploy(s){
-    if(s.setup!==4||!s.tests||(s.extras&&!s.extraTests)){s.failures++;s.ending='chaotic';return 'chaotic';}
-    s.ending=s.extras&&s.extraTests?'perfect':'partial';if(s.ending==='perfect'&&!s.achievements.includes('Natal em produção'))s.achievements.push('Natal em produção');return s.ending;
+    if(s.setup!==4||!s.tests||!s.extraTests||!s.extras||!s.revealed||!['pinheiro','wanderson'].every(id=>s.helpers.includes(id))){s.failures++;return 'blocked';}
+    s.ending='complete';s.finaleSeen=false;if(!s.achievements.includes('Natal em produção'))s.achievements.push('Natal em produção');return s.ending;
   }
   function objective(s){
     if(!s.clues.includes('incident'))return {title:'Só mais um teste…',desc:'Use o computador SantaLog na Fábrica.',target:'santalog'};
@@ -37,20 +37,20 @@ window.Campaign = (() => {
     if(!s.revealed)return {title:'Uma conversa na copa',desc:'Converse com Rosangela sobre o Modo Natal.',target:'rosangela'};
     const helper=['pinheiro','wanderson'].find(id=>!s.helpers.includes(id));
     if(helper)return {title:'Ninguém faz deploy sozinho',desc:`Peça a colaboração de ${Story.actors[helper].name}.`,target:helper};
-    if(s.ending==='perfect'||s.ending==='partial')return {title:'O Natal está em produção',desc:'Explore o campus, converse e celebre. Você conseguiu.',target:'santalog'};
-    return {title:s.setup<4?'Recupere o SantaLog':'O último deploy',desc:s.setup<4?'Volte ao SantaLog. Backup, rota e lote: nessa ordem.':'Valide as entregas e escolha o destino dos extras.',target:'santalog'};
+    if(s.ending==='complete')return {title:'Feliz Natal!',desc:'Plantão encerrado. A equipe foi comemorar na copa.',target:'santalog'};
+    return {title:s.setup<4?'Recupere o SantaLog':'O último deploy',desc:s.setup<4?'Volte ao SantaLog. Backup, rota e lote: nessa ordem.':'Valide as entregas e confira os cartões antes do deploy.',target:'santalog'};
   }
   function save(s,storage){try{storage.setItem(SAVE_KEY,JSON.stringify(s));return true;}catch{return false;}}
   function load(storage){try{
     const raw=JSON.parse(storage.getItem(SAVE_KEY));if(!raw||raw.version!==1)return null;
-    const s=fresh();for(const key of ['started','deduced','revealed','tests','extras','extraTests','muted'])if(typeof raw[key]==='boolean')s[key]=raw[key];
+    const s=fresh();for(const key of ['started','deduced','revealed','tests','extras','extraTests','muted','finaleSeen'])if(typeof raw[key]==='boolean')s[key]=raw[key];
     for(const key of ['clues','talked','helpers','visited','achievements'])if(Array.isArray(raw[key]))s[key]=[...new Set(raw[key].filter(v=>typeof v==='string'))];
     s.clues=s.clues.filter(id=>Story.clues[id]);s.talked=s.talked.filter(id=>Story.actors[id]);s.helpers=s.helpers.filter(id=>['pinheiro','wanderson'].includes(id));
     for(const id of Object.keys(s.solved))s.solved[id]=raw.solved?.[id]===true;
     for(const key of ['setup','failures','hints','seconds'])if(Number.isFinite(raw[key])&&raw[key]>=0)s[key]=raw[key];s.setup=Math.min(4,Math.floor(s.setup));
     if(['factory','campus','library','server'].includes(raw.scene))s.scene=raw.scene;
     if(Number.isFinite(raw.position?.x)&&Number.isFinite(raw.position?.y))s.position={x:raw.position.x,y:raw.position.y};
-    if(['perfect','partial','chaotic'].includes(raw.ending))s.ending=raw.ending;
+    if(['complete','perfect','partial'].includes(raw.ending)){s.ending='complete';s.extras=true;s.extraTests=true;s.tests=true;s.setup=4;} // Finais antigos convergem para a mesma celebração.
     for(const key of ['music','effects'])if(Number.isFinite(raw.audio?.[key]))s.audio[key]=Math.max(0,Math.min(1,raw.audio[key]));
     return sync(s);
   }catch{return null;}}

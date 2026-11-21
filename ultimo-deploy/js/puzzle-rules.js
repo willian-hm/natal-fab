@@ -58,5 +58,8 @@ window.PuzzleRules=(()=>{
     const tested=['total','duplicatas','destino'].every(name=>assertions.some(a=>a.name===name&&a.passed))&&assertions.every(a=>a.passed);
     return {ok:true,output,queries,assertions,printed,success:mode==='database'?found:tested};
   }
-  return {release,rotate,circuit,circuitStart,circuitSolution,binary,execute};
+  function toggleLock(lights,index){return lights.map((v,i)=>Math.abs(i%3-index%3)+Math.abs(Math.floor(i/3)-Math.floor(index/3))<=1?1-v:v);}
+  const lockStart=[0,4,8].reduce((lights,i)=>toggleLock(lights,i),Array(9).fill(0));
+  function memoryDeck(){const pairs=[['104','★','Ana'],['218','☾','Bruno'],['307','♥','Lia'],['410','❄','Caio']];const cards=pairs.flatMap(([key,icon,name])=>[{key,icon,label:'Presente '+key},{key,icon,label:name+' · '+key}]);for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}return cards;}
+  return {toggleLock,lockStart,memoryDeck,release,rotate,circuit,circuitStart,circuitSolution,binary,execute};
 })();
