@@ -12,6 +12,26 @@ window.Characters = (() => {
     const step=frame===1?1:frame===3?-1:0,body=actor.oversized?14:slim?8:10,left=(20-body)/2;
     const side=dir==='left'||dir==='right',back=dir==='up';
     if(dir==='left'){g.translate(20,0);g.scale(-1,1);}
+    // Fabrício tem um perfil próprio: uma orelha/olho e cabelo apenas atrás.
+    // Reutilizar o rosto frontal deixava uma mecha sobre o nariz ao virar.
+    if(actor.bald&&side){
+      p(7,26,4,6,'#37444f');p(10,26,4,6,'#45525c');
+      p(6+step,31,5,2,'#17252b');p(10-step,31,5,2,'#17252b');
+      p(6,top+13,9,13,ink);p(7,top+14,7,10,actor.color);
+      p(7,top+14,2,9,shade(actor.color,.8));p(9,top+15,4,2,shade(actor.color,1.12));
+      p(9,top+17,4,5,actor.color);p(10+step,top+22,3,3,actor.skin);
+      p(8,top+10,5,4,shade(actor.skin,.88));
+      p(7,top,6,1,ink);p(5,top+1,10,10,ink);p(6,top+10,9,3,ink);
+      p(6,top+2,8,9,actor.skin);p(7,top+1,6,1,actor.skin);
+      p(7,top+10,7,2,actor.skin);p(14,top+5,1,6,actor.skin);
+      p(15,top+7,1,1,actor.skin);
+      p(8,top+2,4,1,shade(actor.skin,1.12));
+      if(actor.sideHair){p(5,top+5,3,6,actor.hair);p(6,top+4,2,3,actor.hair);p(5,top+6,1,3,shade(actor.hair,1.25));}
+      p(8,top+7,2,3,actor.skin);p(8,top+8,1,1,shade(actor.skin,.78));
+      p(13,top+6,1,2,ink);p(13,top+10,2,1,'#966854');
+      p(7,top+13,7,2,'#ae6662');p(12,top+15,2,4,'#ae6662');
+      return c;
+    }
     // Pernas e sapatos: a base permanece igual em todas as alturas.
     p(6,26,8,6,ink);p(6,26,3,5+step,'#37444f');p(11,26,3,5-step,'#45525c');
     p(5,31+step,5,2,'#17252b');p(11,31-step,5,2,'#17252b');
