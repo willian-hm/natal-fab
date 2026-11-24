@@ -5,6 +5,18 @@ const vm=require('node:vm');
 const context={window:{}};
 vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../js/puzzle-rules.js'),'utf8'),context);
 const R=context.window.PuzzleRules;
+test('Três redes crescentes são conectadas, embaralhadas e recuperáveis por rotação',()=>{
+  assert.deepEqual(Array.from(R.networkLevels,l=>l.width),[3,4,5]);
+  for(const level of R.networkLevels){assert.equal(R.circuit(level.start,level.width).complete,false);assert.equal(R.circuit(level.solution,level.width).complete,true);assert.equal(R.circuit(level.solution,level.width).lit.length,level.width**2);level.start.forEach((value,i)=>{const variants=[value];for(let n=0;n<3;n++)variants.push(R.rotate(variants.at(-1)));assert.ok(variants.includes(level.solution[i]));});}
+});
+test('Mosaico preserva peças, recusa movimentos ilegais e nasce solúvel',()=>{
+  const board=Array.from(R.mosaicStart);assert.equal(R.mosaicComplete(board),false);
+  assert.deepEqual([...board].sort(),[0,1,2,3,4,5,6,7,8]);
+  const gap=board.indexOf(0);assert.deepEqual(Array.from(R.slide(board,gap)),board);assert.deepEqual(Array.from(R.slide(board,-1)),board);
+  const nonzero=board.filter(Boolean);let inversions=0;for(let i=0;i<8;i++)for(let j=i+1;j<8;j++)if(nonzero[i]>nonzero[j])inversions++;
+  assert.equal(inversions%2,0,'Paridade par garante solução em tabuleiro 3×3');
+  for(let i=0;i<9;i++){const next=R.slide(board,i);if(next.join()!==board.join())assert.deepEqual(Array.from(R.slide(next,gap)),board);}
+});
 test('Circuito exige conexão completa sem pontas abertas',()=>{
   assert.equal(R.circuit(R.circuitStart).complete,false);
   assert.equal(R.circuit(R.circuitSolution).complete,true);

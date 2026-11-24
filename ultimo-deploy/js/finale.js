@@ -2,7 +2,7 @@
 window.Finale=(()=>{
   let root,canvas,g,raf=0,elapsed=0,last=0,finish=()=>{},saidHo=false,active=false;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const cast=['fabricio','tiago','heineck','rosangela','pinheiro','aresi','angelita','diego','wanderson','willian'];
+  const cast=['fabricio','tiago','heineck','rosangela','pinheiro','aresi','leila','diego','wanderson','willian','claudionei'];
   const captions={exit:'Fabrício: “Deploy concluído. Agora ninguém trabalha mais hoje.”',walk:'Rosangela: “O bolo tá esperando na copa. E dessa vez fui eu mesmo que fiz!”',party:'Willian: “Natal salvo, nome limpo… e uma fatia bem grande pra mim.”',moon:'Por uma noite, o campus inteiro podia descansar.',santa:'HO! HO! HO!'};
   const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
   const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
@@ -28,7 +28,7 @@ window.Finale=(()=>{
   function plate(x,y){g.fillStyle='#e8e2c6';g.beginPath();g.ellipse(x,y,12,5,0,0,Math.PI*2);g.fill();rect(x-6,y-8,12,8,'#a7664f');rect(x-6,y-9,12,3,'#f1d9b5');}
   function feast(t=0,photo=false){
     room();
-    const positions=photo?[[149,232],[231,220],[409,220],[494,232],[122,312],[519,312],[166,377],[260,380],[378,380],[474,377]]:cast.map((_,i)=>{const a=i/10*Math.PI*2;return [320+Math.cos(a)*207,282+Math.sin(a)*86];});
+    const positions=photo?[[149,232],[231,220],[409,220],[494,232],[122,312],[519,312],[130,377],[225,380],[320,380],[415,377],[510,377]]:cast.map((_,i)=>{const a=i/cast.length*Math.PI*2;return [320+Math.cos(a)*207,282+Math.sin(a)*86];});
     function drawOne(i){const [x,y]=positions[i],hop=photo||reduced?0:Math.max(0,Math.sin(t*5+i*.9))*9;person(cast[i],x,y-hop,'down',photo?0:Math.floor(t*5)%4,photo?1.8:1.35);if(photo){plate(x+19,y-18);rect(x+10,y-32,9,4,Story.actors[cast[i]].skin||'#dbb289');}}
     positions.forEach((p,i)=>{if(p[1]<270)drawOne(i);});table();positions.forEach((p,i)=>{if(p[1]>=270)drawOne(i);});
     if(!photo){text('♪',126,191+Math.sin(t*2)*3,17,'#e7c68b');text('♫',515,188+Math.cos(t*2)*3,17,'#e7c68b');}
@@ -50,5 +50,39 @@ window.Finale=(()=>{
     function frame(now){if(!active)return;const dt=Math.min(.1,(now-last)/1000);last=now;if(!document.hidden)elapsed+=dt;if(phase(elapsed)==='photo'){complete();return;}draw(elapsed);raf=requestAnimationFrame(frame);}draw(0);raf=requestAnimationFrame(frame);
   }
   function photo(target){const previous=g;target.width=960;target.height=630;g=target.getContext('2d');g.imageSmoothingEnabled=false;g.save();g.scale(1.5,1.5);feast(0,true);g.restore();g=previous;}
-  return {play,stop,photo,phase,get active(){return active;}};
+  function vignette(kind,onFinish){
+    stop();finish=onFinish;elapsed=0;last=performance.now();active=true;saidHo=false;Engine.paused=true;
+    document.body.classList.add('finale-playing');
+    const intro=kind==='intro';
+    root=document.createElement('section');root.id='finale-stage';root.dataset.stage=kind;
+    root.setAttribute('aria-label',intro?'Abertura da Fábrica':'Pós-crédito secreto');
+    root.innerHTML=`${intro?'<img class="intro-logo" src="assets/fabrica-logo.png" alt="Fábrica de Software">':''}<canvas id="finale-canvas" width="640" height="440"></canvas><p id="finale-caption" role="status"></p><button id="finale-skip">${intro?'Começar o plantão':'Ver a foto secreta'}</button>`;
+    document.body.append(root);canvas=root.querySelector('canvas');g=canvas.getContext('2d');g.imageSmoothingEnabled=false;
+    root.querySelector('button').onclick=complete;root.querySelector('button').focus();GameAudio.setMode(intro?'explore':'victory');
+    function frame(now){
+      if(!active)return;const dt=Math.min(.1,(now-last)/1000);last=now;if(!document.hidden)elapsed+=dt;
+      if(elapsed>(intro?7:12)){complete();return;}
+      g.clearRect(0,0,640,440);
+      if(intro){
+        const z=reduced?1:1+smooth(elapsed/7)*.09;g.save();g.translate(320,220);g.scale(z,z);g.drawImage(Engine.rooms.factory.canvas,-320,-220);g.restore();
+        for(const [i,id] of cast.entries())if(Story.actors[id].scene==='factory')person(id,Story.actors[id].x,Story.actors[id].y);
+        person('fabricio',320,355-smooth(elapsed/4)*58,'up',elapsed<4?Math.floor(elapsed*7)%4:0);
+        root.querySelector('#finale-caption').textContent=elapsed<3?'IFC Videira · 24 de dezembro · 23h04':'Uma fábrica acesa. Um último teste. O bolo podia esperar… só um pouquinho.';
+      }else{
+        sky();
+        // Campus ao longe, abaixo do trenó: a câmera já acompanha a carona clandestina.
+        for(let i=0;i<12;i++){const x=i*59-25,y=332+(i%3)*18;rect(x,y,48,48,'#314a58');rect(x-3,y-4,54,7,'#7b6160');for(let j=0;j<4;j++)rect(x+6+j*10,y+9,4,7,'#e3c58c');}
+        const sway=reduced?0:Math.sin(elapsed*2)*5;g.save();g.translate(0,sway);santa(23.55);
+        const x=740-clamp(1.55/4.5)*940;rect(x-3,147,3,17,'#dfb08b');rect(x+10,147,3,17,'#dfb08b');person('willian',x+5,193,'down',Math.floor(elapsed*7)%4,1.35);g.restore();
+        const caption=elapsed<3?'Depois dos créditos… alguém resolveu investigar por conta própria.':elapsed<9?'Willian: “SOCORROOO! Não devia ter vindo escondido! Eu só queria ver o trenó!”':'Papai Noel: “HO HO HO!”';
+        root.querySelector('#finale-caption').textContent=caption;
+        if(elapsed>3&&elapsed<8&&Math.floor(elapsed*8)!==Math.floor((elapsed-dt)*8))GameAudio.voice('willian');
+        if(elapsed>=9&&!saidHo){saidHo=true;GameAudio.hoho();}
+      }
+      // Barras discretas dão enquadramento às cenas sem esconder os personagens.
+      rect(0,0,640,12,'#0c1524');rect(0,420,640,20,'#0c1524');raf=requestAnimationFrame(frame);
+    }
+    raf=requestAnimationFrame(frame);
+  }
+  return {play,stop,photo,phase,intro:done=>vignette('intro',done),postcredits:done=>vignette('postcredits',done),get active(){return active;}};
 })();

@@ -2,7 +2,7 @@
 window.GameAudio=(()=>{
   let context,master,musicBus,fxBus,timer,enabled=false,mode='explore',step=0,next=0,lastVoice=0,lastTap=-1;
   let settings={music:.28,effects:.55};
-  const profiles={fabricio:[120,'triangle'],tiago:[155,'square'],heineck:[98,'triangle'],pinheiro:[108,'sine'],aresi:[140,'triangle'],diego:[168,'sine'],wanderson:[132,'triangle'],willian:[185,'triangle'],rosangela:[285,'sine'],angelita:[245,'triangle']};
+  const profiles={claudionei:[148,'sine'],fabricio:[120,'triangle'],tiago:[155,'square'],heineck:[98,'triangle'],pinheiro:[108,'sine'],aresi:[140,'triangle'],diego:[168,'sine'],wanderson:[132,'triangle'],willian:[185,'triangle'],rosangela:[285,'sine'],leila:[245,'triangle']};
   const melodies={explore:[72,76,79,76,74,71,67,null,69,72,76,79,77,74,72,null],terminal:[57,null,64,69,60,null,67,71,57,null,64,69,62,67,64,null],victory:[72,76,79,84,83,79,77,74,76,79,84,88,86,84,79,null]};
   const frequency=n=>440*2**((n-69)/12);
   function tone(hz,when,duration,volume=.1,type='sine',bus=fxBus){

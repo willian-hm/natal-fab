@@ -15,10 +15,10 @@ function audioRig(){
 }
 test('Vozes têm perfis distintos e respeitam mute e volume',async()=>{
   const r=audioRig();r.audio.configure(false);await r.audio.unlock();const pitches=[];
-  for(const actor of ['fabricio','tiago','heineck','pinheiro','aresi','diego','wanderson','willian','rosangela','angelita']){r.context.currentTime+=.1;const before=r.notes.length;r.audio.voice(actor,2);assert.equal(r.notes.length,before+2);pitches.push(r.notes[before].frequency.value);assert.equal(r.gains.at(-2).gain.peak,.24);}
+  for(const actor of ['fabricio','tiago','heineck','pinheiro','aresi','diego','wanderson','willian','rosangela','leila']){r.context.currentTime+=.1;const before=r.notes.length;r.audio.voice(actor,2);assert.equal(r.notes.length,before+2);pitches.push(r.notes[before].frequency.value);assert.equal(r.gains.at(-2).gain.peak,.24);}
   assert.equal(new Set(pitches).size,10);assert.ok(Math.min(...pitches.slice(8))>Math.max(...pitches.slice(0,8)));
   const before=r.notes.length;r.audio.configure(true);r.context.currentTime+=1;r.audio.voice('fabricio',2);r.audio.play('success');assert.equal(r.notes.length,before);
-  r.audio.configure(false,{music:1,effects:0});r.context.currentTime+=1;r.audio.voice('angelita',2);r.audio.play('tap');assert.equal(r.notes.length,before);
+  r.audio.configure(false,{music:1,effects:0});r.context.currentTime+=1;r.audio.voice('leila',2);r.audio.play('tap');assert.equal(r.notes.length,before);
 });
 test('Trilha muda com o cenário, não reinicia a cada tecla e suspende oculta',async()=>{
   const r=audioRig();r.audio.configure(false,{music:.2,effects:.5});await r.audio.unlock();r.intervals[0]();assert.ok(r.notes.length>0);const explore=r.notes[0].frequency.value;

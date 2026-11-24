@@ -1,8 +1,9 @@
 /* Máquina de estados e regras puras: usadas pelo jogo e pelos testes. */
 window.Campaign = (() => {
   const SAVE_KEY='ultimo-deploy-v1';
-  const fresh=()=>({version:1,started:false,act:1,clues:[],talked:[],helpers:[],solved:{commits:false,network:false,database:false},deduced:false,revealed:false,setup:0,tests:false,extras:false,extraTests:false,ending:null,finaleSeen:false,failures:0,hints:0,seconds:0,scene:'factory',position:{x:309,y:296},visited:['factory'],achievements:[],muted:false,audio:{music:.28,effects:.55}});
+  const fresh=()=>({version:1,started:false,act:1,clues:[],talked:[],helpers:[],solved:{commits:false,network:false,database:false},deduced:false,revealed:false,setup:0,tests:false,extras:false,extraTests:false,ending:null,finaleSeen:false,secrets:[],mosaic:false,postcreditsSeen:false,failures:0,hints:0,seconds:0,scene:'factory',position:{x:309,y:296},visited:['factory'],achievements:[],muted:false,audio:{music:.28,effects:.55}});
   function sync(s){
+    s.secrets??=[];
     // Compatibilidade com partidas anteriores à entrada do Willian no elenco.
     if(s.solved.commits){if(!s.clues.includes('innocence'))s.clues.push('innocence');if(!s.achievements.includes('Justiça pelo estagiário'))s.achievements.push('Justiça pelo estagiário');}
     s.act=!s.clues.includes('incident')||!s.talked.includes('tiago')?1:!Story.required.every(id=>s.talked.includes(id))?2:!Object.values(s.solved).every(Boolean)?3:!s.revealed?4:5;
@@ -31,7 +32,7 @@ window.Campaign = (() => {
   function objective(s){
     if(!s.clues.includes('incident'))return {title:'Só mais um teste…',desc:'Use o computador SantaLog na Fábrica.',target:'santalog'};
     if(!s.talked.includes('tiago'))return {title:'Temos um problema',desc:'Converse com Tiago, perto da mesa de commits.',target:'tiago'};
-    if(s.act===2){const id=Story.required.find(id=>!s.talked.includes(id));return {title:'Ouça o campus',desc:`${Story.required.filter(id=>s.talked.includes(id)).length}/5 depoimentos. Encontre ${Story.actors[id].name}.`,target:id};}
+    if(s.act===2){const id=Story.required.find(id=>!s.talked.includes(id));return {title:'Ouça o campus',desc:`${Story.required.filter(id=>s.talked.includes(id)).length}/${Story.required.length} depoimentos. Encontre ${Story.actors[id].name}.`,target:id};}
     if(s.act===3){const id=Object.keys(s.solved).find(id=>!s.solved[id]);return {title:{commits:'O que foi publicado?',network:'Siga a conexão',database:'Onde estão os presentes?'}[id],desc:{commits:'Compare a versão publicada no terminal da Fábrica.',network:'Investigue o rack na Sala de Servidores.',database:'Analise o lote no computador da Biblioteca.'}[id],target:id};}
     if(!s.deduced)return {title:'Ligue os pontos',desc:'Reúna as três provas no quadro de evidências.',target:'board'};
     if(!s.revealed)return {title:'Uma conversa na copa',desc:'Converse com Rosangela sobre o Modo Natal.',target:'rosangela'};
@@ -43,8 +44,10 @@ window.Campaign = (() => {
   function save(s,storage){try{storage.setItem(SAVE_KEY,JSON.stringify(s));return true;}catch{return false;}}
   function load(storage){try{
     const raw=JSON.parse(storage.getItem(SAVE_KEY));if(!raw||raw.version!==1)return null;
-    const s=fresh();for(const key of ['started','deduced','revealed','tests','extras','extraTests','muted','finaleSeen'])if(typeof raw[key]==='boolean')s[key]=raw[key];
-    for(const key of ['clues','talked','helpers','visited','achievements'])if(Array.isArray(raw[key]))s[key]=[...new Set(raw[key].filter(v=>typeof v==='string'))];
+    const s=fresh();for(const key of ['started','deduced','revealed','tests','extras','extraTests','muted','finaleSeen','mosaic','postcreditsSeen'])if(typeof raw[key]==='boolean')s[key]=raw[key];
+    for(const key of ['clues','talked','helpers','visited','achievements','secrets'])if(Array.isArray(raw[key]))s[key]=[...new Set(raw[key].filter(v=>typeof v==='string'))];
+    s.secrets=s.secrets.filter(id=>['duck','disk','book','bell','cookie'].includes(id));
+    if(s.talked.includes('angelita'))s.talked.push('leila');if(s.clues.includes('angelita'))s.clues.push('leila');
     s.clues=s.clues.filter(id=>Story.clues[id]);s.talked=s.talked.filter(id=>Story.actors[id]);s.helpers=s.helpers.filter(id=>['pinheiro','wanderson'].includes(id));
     for(const id of Object.keys(s.solved))s.solved[id]=raw.solved?.[id]===true;
     for(const key of ['setup','failures','hints','seconds'])if(Number.isFinite(raw[key])&&raw[key]>=0)s[key]=raw[key];s.setup=Math.min(4,Math.floor(s.setup));

@@ -1,0 +1,5 @@
+# Remoção do crachá extra
+
+Arquivo final: secret-sleigh-v3.png. Edição feita com a ferramenta integrada de imagens, usando secret-sleigh-v2.png como base e seguindo a área marcada pelo usuário.
+
+Precise object removal edit. In this image remove ONLY the extra floating white ID badge to the RIGHT of the dangling young man's shoulder and face, and the loose dark/gold lanyard strap curving from his shoulder out to that floating badge. This is the small region approximately x=987–1118, y=550–648 on the 1536x1024 image, corresponding to the user's white-marked area. Seamlessly fill with the same indigo painted night sky/cloud texture. KEEP the single ID badge that lies on his WHITE SHIRT at the center of his chest around x=1010,y=684. KEEP his silver necklace, both arms and hands gripping the sleigh, his curls, face, tears, all clothing, Santa, the sleigh, speech bubble HO HO HO!, campus, lighting, composition, resolution and painterly cartoon style EXACTLY unchanged. Do not modify anything outside the tiny floating-badge-and-strap area. No new details.
