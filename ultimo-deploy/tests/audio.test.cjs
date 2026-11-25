@@ -26,3 +26,8 @@ test('Trilha muda com o cenário, não reinicia a cada tecla e suspende oculta',
   r.document.hidden=true;const hiddenCount=r.notes.length;r.context.currentTime+=1;r.intervals[0]();r.audio.play('success');assert.equal(r.notes.length,hiddenCount);
   assert.equal(r.gains[1].gain.value,.2);assert.equal(r.gains[2].gain.value,.5);
 });
+test('Falas de cutscene sem índice de texto produzem frequências válidas',async()=>{
+  const r=audioRig();r.audio.configure(false);await r.audio.unlock();
+  r.audio.voice('willian');assert.equal(r.notes.length,2);
+  for(const note of r.notes)assert.ok(Number.isFinite(note.frequency.value)&&note.frequency.value>0);
+});

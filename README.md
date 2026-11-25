@@ -55,7 +55,7 @@ Referências pesquisadas para as mecânicas: [Net, de Simon Tatham](https://www.
 
 O deploy só conclui após recuperação, testes e cartões conferidos. Pendências voltam para a própria tarefa, sem finais alternativos. Ao concluir, todos saem da Fábrica, caminham até a copa e saltitam em volta da mesa com o bolo. A câmera sobe para a lua e a silhueta do trenó passa com um “ho, ho, ho”. A cena termina em **Feliz Natal**, com uma fotografia ilustrada da equipe comendo bolo.
 
-A cena e a foto são pixel art autoral desenhada em Canvas, usando as aparências do elenco. Não há conversas repetidas nem exploração após o fim; ficam disponíveis rever a celebração, créditos e menu. A opção “Pular para a foto” conclui a cena; continuar uma partida finalizada abre a foto. Saves de finais anteriores são migrados para a mesma celebração. Movimento reduzido desliga os pulos e troca a subida de câmera por um corte. A fala de Papai Noel usa uma voz portuguesa local, se disponível, ou um efeito vocal sintetizado como alternativa, sempre respeitando o som desligado.
+As cenas usam pixel art em Canvas. As fotos finais são ilustrações cartoon geradas para a aventura, revisadas com as fotos da equipe e as referências fornecidas para Aresi, Rosangela e Willian. Os sprites e retratos compartilham essas características. Não há conversas repetidas nem exploração após o fim; ficam disponíveis rever a celebração, créditos e menu. A opção “Pular para a foto” conclui a cena; continuar uma partida finalizada abre a foto. Saves de finais anteriores são migrados para a mesma celebração. Movimento reduzido desliga os pulos e troca a subida de câmera por um corte. A fala de Papai Noel usa uma voz portuguesa local, se disponível, ou um efeito vocal sintetizado como alternativa, sempre respeitando o som desligado.
 
 ## Organização
 
@@ -80,7 +80,7 @@ A cena e a foto são pixel art autoral desenhada em Canvas, usando as aparência
 node --test ultimo-deploy/tests/*.test.cjs
 ```
 
-Os testes cobrem os cinco atos, as 120 ordens dos depoimentos obrigatórios, respostas incorretas, ordem de recuperação, encerramento único, salvamento indisponível/inválido, reinício, circuitos, conversões, execução didática e controles de áudio.
+Os testes cobrem os cinco atos, as 720 ordens dos seis depoimentos obrigatórios, respostas incorretas, ordem de recuperação, encerramento único, salvamento indisponível/inválido, reinício, circuitos, conversões, execução didática e controles de áudio.
 
 Com o servidor iniciado, abra `/ultimo-deploy/tests/browser.html` e clique em **Executar verificação completa**. O teste dirige as interfaces reais, verifica acesso aos pontos interativos dos interiores, acompanha todas as etapas da celebração, continuação e recarregamento. Usa teleporte de preparação entre cenas; não simula cada passo do jogador. Preserva e restaura o save anterior. Não abra uma partida ativa em outra aba durante esse teste, para evitar concorrência de salvamentos.
 
@@ -95,3 +95,13 @@ Mais missões opcionais e ramificações, interiores adicionais, navegação aut
 Base: https://github.com/willian-hm/ifc-map — arquivo `index.html`, blob `ec7d11cd0437db18b843e59bdb63c559b10901ac`, consultado em 20/11/2026. A estrutura, texturas, prédios, vegetação, lagos e resolução de colisões foram reaproveitados; câmera e minimapa adaptados para a campanha. Nenhuma alteração foi feita no repositório remoto.
 
 História inteiramente fictícia e afetuosa. Os sistemas, commits e dados de entregas existem apenas dentro do jogo.
+
+## Novidades do plantão
+
+A abertura apresenta o logo original da Fábrica. O elenco reúne os oito professores da [equipe oficial](https://fabrica.labia.ifc.edu.br/equipe), com Aresi, Rosangela e Willian como participações especiais.
+
+O terminal de commits começa com um mosaico deslizante 3×3, inspirado no [Fifteen de Simon Tatham](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/doc/fifteen.html), com embaralhamento solúvel, referência, desfazer e reiniciar. O circuito de rede tem três transmissões: 3×3, 4×4 e 5×5, com diálogos entre elas.
+
+Cinco objetos escondidos pela Fábrica, servidores, biblioteca e campus ficam registrados no caderno. Encontre todos antes do deploy para liberar a cena pós-créditos do Willian pendurado no trenó. Nos créditos, escolha “Continuar · cena pós-créditos”. A coleção e a conclusão persistem no save. O final de Natal continua único, mesmo sem os segredos.
+
+Artes em uso: `assets/christmas-party-v2.png` e `assets/secret-sleigh-v3.png`. O crachá extra da segunda imagem foi removido conforme a área marcada pelo usuário. Prompts e referências estão documentados em `assets/art-direction.md`, `assets/art-revisions.md` e `assets/secret-sleigh-v3-prompt.md`.

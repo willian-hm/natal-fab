@@ -35,7 +35,7 @@ window.GameAudio=(()=>{
     else if(type==='drop'){tone(350,t,.09,.1,'triangle');tone(520,t+.035,.08,.08,'sine');}
     else {tone(650,t,.045,.10,'sine');tone(900,t+.025,.035,.045,'sine');}
   }
-  function voice(actor,textIndex){
+  function voice(actor,textIndex=0){
     if(!context||!enabled||settings.effects===0||context.currentTime-lastVoice<.06)return;
     lastVoice=context.currentTime;const [pitch,type]=profiles[actor]||[170,'triangle'];
     const f=pitch*(1+((textIndex%5)-2)*.045);tone(f,lastVoice,.065,.24,type);tone(f*2,lastVoice,.045,.045,'sine');

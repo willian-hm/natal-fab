@@ -76,7 +76,7 @@ window.Finale=(()=>{
         const x=740-clamp(1.55/4.5)*940;rect(x-3,147,3,17,'#dfb08b');rect(x+10,147,3,17,'#dfb08b');person('willian',x+5,193,'down',Math.floor(elapsed*7)%4,1.35);g.restore();
         const caption=elapsed<3?'Depois dos créditos… alguém resolveu investigar por conta própria.':elapsed<9?'Willian: “SOCORROOO! Não devia ter vindo escondido! Eu só queria ver o trenó!”':'Papai Noel: “HO HO HO!”';
         root.querySelector('#finale-caption').textContent=caption;
-        if(elapsed>3&&elapsed<8&&Math.floor(elapsed*8)!==Math.floor((elapsed-dt)*8))GameAudio.voice('willian');
+        if(elapsed>3&&elapsed<8&&Math.floor(elapsed*8)!==Math.floor((elapsed-dt)*8))GameAudio.voice('willian',Math.floor(elapsed*8));
         if(elapsed>=9&&!saidHo){saidHo=true;GameAudio.hoho();}
       }
       // Barras discretas dão enquadramento às cenas sem esconder os personagens.
