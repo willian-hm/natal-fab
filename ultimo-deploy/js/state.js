@@ -19,7 +19,7 @@ window.Campaign = (() => {
   function checkDatabase(env,batch,total,action){return env==='sandbox'&&batch==='NATAL-24'&&total==='2400000'&&action==='move';}
   function checkDeduction(s,feature,trigger,result){return Object.values(s.solved).every(Boolean)&&feature==='mode'&&trigger==='click'&&result==='redirect';}
   function restore(s,action){
-    if(!s.revealed||!['pinheiro','wanderson'].every(id=>s.helpers.includes(id)))return {ok:false,message:'Converse com Fábio Pinheiro e Wanderson antes de alterar o sistema.'};
+    if(!s.revealed||!['pinheiro','wanderson'].every(id=>s.helpers.includes(id)))return {ok:false,message:'Converse com Fábio e Wanderson antes de alterar o sistema.'};
     const order=['backup','route','migrate','disable'];
     if(action!==order[s.setup])return {ok:false,message:['Primeiro proteja os dados com um backup.','Corrija o destino antes de mover o lote.','A rota foi corrigida; agora recupere o lote preservando os IDs.','O lote está em produção. Desative o botão experimental para evitar outro desvio.'][s.setup]||'A configuração já está restaurada.'};
     s.setup++;s.tests=false;return {ok:true,message:['Snapshot criado: NATAL-24 seguro.','Destino atualizado para produção.','2.400.000 IDs migrados, sem duplicatas.','Modo Natal bloqueado. Uma estrela de papel foi instalada no lugar.'][s.setup-1]};

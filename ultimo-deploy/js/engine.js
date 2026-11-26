@@ -6,7 +6,7 @@ window.Engine = (()=>{
   const player={x:309,y:296,dir:'down',frame:0,hbHalfW:5,hbH:7};
   const rooms={},sprites={},roomNames={factory:'Fábrica de Software',server:'Sala de Servidores',library:'Biblioteca'};
   const doors=[{id:'factory',name:'Fábrica de Software',x:1160,y:994},{id:'server',name:'Sala de Servidores',x:795,y:757},{id:'library',name:'Biblioteca',x:1463,y:696}];
-  const places=[{id:'factory',name:'Fábrica de Software',desc:'Tiago • Willian (dicas) • SantaLog',x:1160,y:1035},{id:'server',name:'Laboratórios',desc:'Heineck • diagnóstico de rede',x:795,y:790},{id:'library',name:'Biblioteca',desc:'Leila Rossi • Aresi • dados',x:1463,y:720},{id:'copa',name:'Copa / Cantina',desc:'Rosangela • café de emergência',x:1743,y:682},{id:'patio',name:'Pátio acadêmico',desc:'Fábio Pinheiro • validação',x:1107,y:1097},{id:'auditorio',name:'Auditório',desc:'Diego • pinguim.py',x:943,y:670}];
+  const places=[{id:'factory',name:'Fábrica de Software',desc:'Tiago • Willian (dicas) • SantaLog',x:1160,y:1035},{id:'server',name:'Laboratórios',desc:'Heineck • diagnóstico de rede',x:795,y:790},{id:'library',name:'Biblioteca',desc:'Leila • Aresi • dados',x:1463,y:720},{id:'copa',name:'Copa / Cantina',desc:'Rosangela • café de emergência',x:1743,y:682},{id:'patio',name:'Pátio acadêmico',desc:'Fábio • validação',x:1107,y:1097},{id:'auditorio',name:'Auditório',desc:'Diego • pinguim.py',x:943,y:670}];
   let scene='factory',paused=true,width=1,height=1,zoom=1,dpr=1,target=null,near=null,time=0,anim=0,handler=()=>{},lastSave=0;
   let cinematic=null;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -111,7 +111,12 @@ window.Engine = (()=>{
     if(scene==='campus')for(const s of Campus.SPRITES)if(s.sortY>player.y&&visible(s.x,s.y,90)&&player.x>s.x-15&&player.x<s.x+s.c.width+15)ctx.drawImage(s.c,s.x,s.y);
     if(!cinematic)for(const p of getNPCs())if(visible(p.x,p.y)&&Math.hypot(p.x-player.x,p.y-player.y)<115){const w=p.name.length*4.3+12;px(ctx,p.x-w/2,p.y-49,w,12,'#0a1824dd');txt(ctx,p.name,p.x,p.y-40,'#f1e6d0',7);}
     if(!cinematic)for(const o of interactables().filter(o=>o.type!=='npc'&&o.type!=='secret'))if(visible(o.x,o.y)){px(ctx,o.x-5,o.y-2,10,3,near?.id===o.id?'#d9c28c':'#a6c6a955');}
-    for(const o of Secrets.items)if(o.scene===scene&&!UI.state.secrets.includes(o.id)&&visible(o.x,o.y)){txt(ctx,o.icon,o.x,o.y,o.color,11);if(Math.hypot(o.x-player.x,o.y-player.y)<90&&Math.sin(t*2)>0.5)txt(ctx,'✦',o.x+7,o.y-9,'#f6dda1',7);}
+    for(const o of Secrets.items)if(!UI.state.ending&&o.scene===scene&&!UI.state.secrets.includes(o.id)&&visible(o.x,o.y)){
+      const distance=Math.hypot(o.x-player.x,o.y-player.y),glow=reduced?1:.75+Math.sin(t*3)*.25;
+      ctx.strokeStyle='#edcf8b';ctx.globalAlpha=glow;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(o.x,o.y-4,10,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+      txt(ctx,o.icon,o.x,o.y,o.color,13);txt(ctx,'✦',o.x+10,o.y-15,'#f6dda1',9);
+      if(!cinematic&&distance<145){const label=o.name,w=label.length*4.3+12;px(ctx,o.x-w/2,o.y-33,w,13,'#0a1824ee');txt(ctx,label,o.x,o.y-24,'#ffe4a3',7);}
+    }
     if(target){ctx.strokeStyle='#b2d5b5';ctx.lineWidth=1;ctx.strokeRect(target.x-5,target.y-3,10,6);}
     if(!paused){const objective=Campaign.objective(UI.state),mark=interactables().find(o=>o.id===objective.target);if(mark&&visible(mark.x,mark.y))txt(ctx,'◆',mark.x,mark.y-62,'#edcf8b',10);}
     ctx.restore();

@@ -38,16 +38,35 @@ window.Finale=(()=>{
     for(let i=0;i<cast.length;i++){const p=clamp((t-6)*.4-i*.075);person(cast[i],-30+p*690,373+(i%2)*14,'right',Math.floor(t*8)%4,1.4);}
   }
   function leave(t){g.drawImage(Engine.rooms.factory.canvas,0,0);for(let i=0;i<cast.length;i++){const p=clamp((t-i*.19)/3.8),start={x:140+(i%5)*75,y:235+Math.floor(i/5)*43};let x,y;if(p<.38){const q=p/.38;x=start.x+(350-start.x)*q;y=start.y+(300-start.y)*q;}else if(p<.7){const q=(p-.38)/.32;x=350-30*q;y=300+70*q;}else{x=320;y=370+(p-.7)/.3*110;}if(p<1)person(cast[i],x,y,p<.38?(start.x<350?'right':'left'):'down',Math.floor(t*8)%4);}}
-  function santa(t){const p=clamp((t-22)/4.5),x=740-p*940,y=90+Math.sin(p*Math.PI)*24;g.save();g.translate(x,y);g.fillStyle='#10142d';
+  function sleighPosition(t){const p=clamp((t-22)/4.5);return {x:740-p*940,y:90+Math.sin(p*Math.PI)*24};}
+  function santa(t){const {x,y}=sleighPosition(t);g.save();g.translate(x,y);g.fillStyle='#10142d';
     // Renas, arreios e trenó em silhueta, passando na frente da lua.
     for(let i=0;i<3;i++){const rx=-65-i*50;rect(rx,-6,29,11,'#10142d');rect(rx-8,-14,12,13,'#10142d');rect(rx-9,-24,3,13,'#10142d');rect(rx-15,-26,9,3,'#10142d');rect(rx-15,-31,3,8,'#10142d');for(const leg of [3,20]){rect(rx+leg,4,3,14,'#10142d');rect(rx+leg-5,16,8,3,'#10142d');}}
     rect(-35,9,76,13,'#10142d');rect(25,-7,15,27,'#10142d');rect(-40,23,84,4,'#10142d');rect(-45,19,8,6,'#10142d');g.beginPath();g.arc(5,0,16,0,Math.PI*2);g.fill();g.beginPath();g.arc(2,-20,8,0,Math.PI*2);g.fill();g.beginPath();g.moveTo(-5,-24);g.lineTo(5,-43);g.lineTo(14,-23);g.fill();g.strokeStyle='#10142d';g.lineWidth=2;g.beginPath();g.moveTo(-35,3);g.lineTo(-175,-3);g.stroke();g.restore();}
+  function hangingWillian(x,y,t){
+    const actor=Story.actors.willian,image=Engine.getSprites().willian.down[0];
+    const swing=reduced?0:Math.sin(t*3)*3,kick=reduced?0:Math.sin(t*7)*3;
+    g.save();g.translate(Math.round(x),Math.round(y));g.scale(1.6,1.6);
+    // Mãos fixas no patim; cotovelos acompanham o corpo, sem braços da pose de caminhada.
+    for(const side of [-1,1]){
+      g.strokeStyle=actor.skin;g.lineWidth=3;g.lineCap='square';g.beginPath();g.moveTo(side*8,1);g.lineTo(side*10+swing/2,10);g.lineTo(side*6+swing,22);g.stroke();
+      rect(side*8-2,-2,4,4,actor.skin);
+      rect(side*6+swing-2,19,4,5,actor.color);
+    }
+    g.translate(swing,0);
+    g.drawImage(image,3,0,14,18,-7,3,14,18);
+    g.drawImage(image,5,18,10,8,-5,21,10,8);
+    // Pernas soltas e desencontradas, em vez de passos sobre uma sombra de chão.
+    g.drawImage(image,5,26,5,8,-5-kick/2,29,5,8);
+    g.drawImage(image,10,26,5,8,kick/2,29+Math.abs(kick)/2,5,8);
+    rect(-1,18,2,3,'#714a42');g.restore();
+  }
   function draw(t){g.clearRect(0,0,640,440);const stage=phase(t);if(stage==='exit')leave(t);else if(stage==='walk')walk(t);else if(stage==='party')feast(t);else if(stage==='moon'){const p=reduced?1:smooth((t-17)/5);g.save();g.translate(0,p*440);feast(t);g.restore();g.save();g.translate(0,-440+p*440);sky();g.restore();}else{sky();santa(t);}if(root){root.dataset.stage=stage;root.querySelector('#finale-caption').textContent=captions[stage]||'';}if(stage==='santa'&&!saidHo){saidHo=true;GameAudio.hoho();}}
   function stop(){cancelAnimationFrame(raf);raf=0;active=false;root?.remove();root=null;GameAudio.silenceSpeech();document.body.classList.remove('finale-playing');}
   function complete(){const callback=finish;stop();callback();}
   function play(onFinish){stop();finish=onFinish;elapsed=0;last=performance.now();saidHo=false;active=true;Engine.paused=true;document.body.classList.add('finale-playing');
     root=document.createElement('section');root.id='finale-stage';root.setAttribute('aria-label','Encerramento de Natal');root.innerHTML='<canvas id="finale-canvas" width="640" height="440" aria-label="A equipe sai da Fábrica e celebra na copa, antes da passagem de Papai Noel pela lua."></canvas><p id="finale-caption" role="status"></p><button id="finale-skip">Pular para a foto</button>';document.body.append(root);canvas=root.querySelector('canvas');g=canvas.getContext('2d');g.imageSmoothingEnabled=false;root.querySelector('button').onclick=complete;root.querySelector('button').focus();GameAudio.setMode('victory');
-    function frame(now){if(!active)return;const dt=Math.min(.1,(now-last)/1000);last=now;if(!document.hidden)elapsed+=dt;if(phase(elapsed)==='photo'){complete();return;}draw(elapsed);raf=requestAnimationFrame(frame);}draw(0);raf=requestAnimationFrame(frame);
+    function frame(now){if(!active)return;const dt=Math.max(0,Math.min(.1,(now-last)/1000));last=now;if(!document.hidden)elapsed+=dt;if(phase(elapsed)==='photo'){complete();return;}draw(elapsed);raf=requestAnimationFrame(frame);}draw(0);raf=requestAnimationFrame(frame);
   }
   function photo(target){const previous=g;target.width=960;target.height=630;g=target.getContext('2d');g.imageSmoothingEnabled=false;g.save();g.scale(1.5,1.5);feast(0,true);g.restore();g=previous;}
   function vignette(kind,onFinish){
@@ -56,11 +75,11 @@ window.Finale=(()=>{
     const intro=kind==='intro';
     root=document.createElement('section');root.id='finale-stage';root.dataset.stage=kind;
     root.setAttribute('aria-label',intro?'Abertura da Fábrica':'Pós-crédito secreto');
-    root.innerHTML=`${intro?'<img class="intro-logo" src="assets/fabrica-logo.png" alt="Fábrica de Software">':''}<canvas id="finale-canvas" width="640" height="440"></canvas><p id="finale-caption" role="status"></p><button id="finale-skip">${intro?'Começar o plantão':'Ver a foto secreta'}</button>`;
+    root.innerHTML=`${intro?'<img class="intro-logo" src="assets/fabrica-logo.png" alt="Fábrica de Software">':''}<canvas id="finale-canvas" width="640" height="440" aria-label="${intro?'Fabrício chega à Fábrica para o último plantão.':'Willian segura o patim do trenó com as duas mãos e balança as pernas sobre o campus.'}"></canvas><p id="finale-caption" role="status"></p><button id="finale-skip">${intro?'Começar o plantão':'Ver a foto secreta'}</button>`;
     document.body.append(root);canvas=root.querySelector('canvas');g=canvas.getContext('2d');g.imageSmoothingEnabled=false;
     root.querySelector('button').onclick=complete;root.querySelector('button').focus();GameAudio.setMode(intro?'explore':'victory');
     function frame(now){
-      if(!active)return;const dt=Math.min(.1,(now-last)/1000);last=now;if(!document.hidden)elapsed+=dt;
+      if(!active)return;const dt=Math.max(0,Math.min(.1,(now-last)/1000));last=now;if(!document.hidden)elapsed+=dt;
       if(elapsed>(intro?7:12)){complete();return;}
       g.clearRect(0,0,640,440);
       if(intro){
@@ -73,7 +92,7 @@ window.Finale=(()=>{
         // Campus ao longe, abaixo do trenó: a câmera já acompanha a carona clandestina.
         for(let i=0;i<12;i++){const x=i*59-25,y=332+(i%3)*18;rect(x,y,48,48,'#314a58');rect(x-3,y-4,54,7,'#7b6160');for(let j=0;j<4;j++)rect(x+6+j*10,y+9,4,7,'#e3c58c');}
         const sway=reduced?0:Math.sin(elapsed*2)*5;g.save();g.translate(0,sway);santa(23.55);
-        const x=740-clamp(1.55/4.5)*940;rect(x-3,147,3,17,'#dfb08b');rect(x+10,147,3,17,'#dfb08b');person('willian',x+5,193,'down',Math.floor(elapsed*7)%4,1.35);g.restore();
+        const anchor=sleighPosition(23.55);hangingWillian(anchor.x+5,anchor.y+25,elapsed);g.restore();
         const caption=elapsed<3?'Depois dos créditos… alguém resolveu investigar por conta própria.':elapsed<9?'Willian: “SOCORROOO! Não devia ter vindo escondido! Eu só queria ver o trenó!”':'Papai Noel: “HO HO HO!”';
         root.querySelector('#finale-caption').textContent=caption;
         if(elapsed>3&&elapsed<8&&Math.floor(elapsed*8)!==Math.floor((elapsed-dt)*8))GameAudio.voice('willian',Math.floor(elapsed*8));
