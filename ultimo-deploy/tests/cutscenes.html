@@ -8,13 +8,13 @@ document.querySelector('#run').onclick=async()=>{
   const check=(ok,label)=>{if(!ok)throw Error(label);report.textContent+='✓ '+label+'\n';count++;report.scrollTop=report.scrollHeight;};
   const click=id=>{const el=d.getElementById(id);if(!el||el.disabled)throw Error('Controle ausente: '+id);el.click();};
   const until=async(fn,ms=60000)=>{const start=Date.now();while(!fn()){if(Date.now()-start>ms)throw Error('A cena não concluiu no tempo esperado.');await wait(50);}};
-  const dialogue=()=>{let n=0;while(d.getElementById('next-line')&&n++<100)click('next-line');check(n<100,'Diálogo termina e devolve o controle');};
+  const dialogue=()=>{let n=0;while(!d.getElementById('overlay').hidden&&d.getElementById('next-line')&&n++<100)click('next-line');check(n<100,'Diálogo termina e devolve o controle');};
   try{
     await until(()=>w.UI&&d.getElementById('new-game'));
     w.Campaign.save=()=>true;w.Campaign.load=()=>null;w.UI.state.started=false;w.UI.menu();click('new-game');
     status.textContent='Abertura da Fábrica · aguardando conclusão natural';
     await until(()=>!w.Finale.active);check(!!d.getElementById('next-line'),'Abertura termina no diálogo inicial');dialogue();
-    w.UI.interact('santalog','object');d.querySelector('[data-open-app]').click();click('initial-test');check(!!w.Engine.cinematic,'Teste do incidente abre a cutscene');dialogue();check(!w.Engine.cinematic&&w.UI.state.clues.includes('incident'),'Incidente termina e libera a investigação');
+    w.UI.interact('santalog','object');d.querySelector('[data-open-app]').click();click('test-start');check(!!w.Engine.cinematic,'Teste do incidente abre a cutscene');dialogue();check(!w.Engine.cinematic&&w.UI.state.clues.includes('incident'),'Incidente termina e libera a investigação');
     const s=w.UI.state;for(const id of ['tiago',...w.Story.required])w.Campaign.talk(s,id);for(const id of ['commits','network','database'])w.Campaign.solve(s,id);s.deduced=true;s.revealed=true;s.helpers=['pinheiro','wanderson'];s.setup=4;s.tests=true;s.extras=true;s.extraTests=true;w.Campaign.sync(s);
     w.UI.interact('santalog','object');d.querySelector('[data-open-app]').click();click('deploy');await until(()=>w.Finale.active);
     status.textContent='Encerramento · saída, copa, lua e trenó (sem pular)';
@@ -32,3 +32,5 @@ document.querySelector('#run').onclick=async()=>{
   }catch(e){status.textContent='Falhou: '+e.message;report.textContent+='✗ '+e.stack;}finally{w.removeEventListener('error',onerror);button.disabled=false;}
 };
 </script></html>
+
+
